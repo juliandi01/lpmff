@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 const SUGGESTION_FILE = __DIR__ . '/data/suggestions.json';
 const SUPPORTED_LANGUAGES = ['de', 'en'];
-const LIBRETRANSLATE_DEFAULT_URL = 'http://killerminion.ddns.berlin:4712/translate';
+const LIBRETRANSLATE_DEFAULT_URL = 'https://killerminion.ddns.berlin:443/translate';
 const MODELS = ['B03X', 'B05', 'B10', 'C10', 'T03'];
 const ALL_MODELS = 'alle';
 const LEAPOS_VERSIONS = ['4.31.22'];
