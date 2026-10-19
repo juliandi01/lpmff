@@ -1,3 +1,0 @@
-# Die reine Passwortabfrage erfolgt in admin/index.php.
-# Die .htpasswd-Datei bleibt außerhalb des Webverzeichnisses.
-Require all granted

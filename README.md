@@ -6,3 +6,10 @@ Die Struktur folgt einer einfachen Logik:
   - Programmier-/Skriptsprache (falls erforderlich)
   - Konfigurationsdateien (falls erforderlich)
   - Dokumentation
+
+# KBA Statistiken Prototype
+
+Dieser Branch dient der Weiterentwicklung von `kbastatistiken`.
+## Scope
+- Included: `kbastatistiken/`
+- Excluded: `sfi_LeapOS/`
