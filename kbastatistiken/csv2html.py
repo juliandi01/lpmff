@@ -1024,6 +1024,14 @@ def generate_html(aggregated_data, target_models, detail_data=None,
                 top: 182px;
             }
         }
+        .page-footer {
+            margin-top: 48px;
+            text-align: center;
+            font-size: .85rem;
+        }
+        .page-footer a {
+            color: #555;
+        }
     </style>
 </head>
 <body>
@@ -1610,6 +1618,7 @@ def generate_html(aggregated_data, target_models, detail_data=None,
 
         applyGlobalFilter(latestYear, defaultMonth);
     </script>
+    <footer class="page-footer"><a href="https://synvoll.de/kontakt/impressum/" target="_blank" rel="noopener">Impressum</a></footer>
 </body>
 </html>
 '''

@@ -3,6 +3,7 @@
 Dieses Projekt verarbeitet KBA-CSV-Exporte aus dem KBA-Statistikportal und erzeugt daraus eine HTML-Statistik, die im Browser als Vorschau angezeigt und optional dauerhaft gespeichert werden kann.
 
 Die eigentliche Weboberfläche liegt in `index.php`. Sie übernimmt die CSV-Upload- und Speicherlogik und startet das Python-Skript `csv2html.py` mit temporären Dateien.
+Sowohl die Weboberfläche als auch die erzeugte Statistik enthalten einen Link zum [Impressum](https://synvoll.de/kontakt/impressum/).
 
 ## Überblick
 

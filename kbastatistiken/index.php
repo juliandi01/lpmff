@@ -6,6 +6,7 @@ const SCRIPT_PATH = __DIR__ . '/csv2html.py';
 const OUTPUT_FILENAME = 'kba-statistiken.html';
 const OUTPUT_PATH = __DIR__ . '/' . OUTPUT_FILENAME;
 const SAVE_PASSWORD_HASH_ENV = 'KBA_SAVE_PASSWORD_HASH';
+const IMPRESSUM_URL = 'https://synvoll.de/kontakt/impressum/';
 
 $error = null;
 $notice = null;
@@ -170,6 +171,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       align-items: center;
       gap: 16px;
     }
+    .page-footer {
+      margin-top: 48px;
+      text-align: center;
+      font-size: .85rem;
+    }
+    .page-footer a {
+      color: #555;
+    }
     .reset-form {
       margin: 0;
       padding: 0;
@@ -243,5 +252,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <h2>Ergebnis</h2>
     <iframe title="Generierte KBA-Statistik" srcdoc="<?= htmlspecialchars($generatedHtml, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>"></iframe>
   </section>
+  <footer class="page-footer"><a href="<?= htmlspecialchars(IMPRESSUM_URL, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>" target="_blank" rel="noopener">Impressum</a></footer>
 </body>
 </html>
