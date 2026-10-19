@@ -45,6 +45,10 @@ textarea { min-height: 128px; resize: vertical; }
 .primary-button { margin-top: 24px; padding: 13px 24px; color: var(--white); background: var(--teal); }
 .primary-button:hover { background: var(--teal-dark); }
 .message { margin: -18px 0 24px; padding: 13px 16px; border-left: 4px solid; background: var(--white); }
+.spinner { display: inline-block; width: .9em; height: .9em; margin-right: 10px; vertical-align: -.1em; border: 2px solid var(--teal); border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.page-footer { margin-top: 48px; text-align: center; font-size: .85rem; }
+.page-footer a { color: var(--muted); }
 .error { color: var(--red); border-color: var(--red); }.success { color: var(--teal-dark); border-color: var(--teal); }
 .count-badge, .model-tag, .status { display: inline-block; white-space: nowrap; }
 .count-badge { padding: 6px 10px; color: var(--teal-dark); background: #dcefeb; border-radius: 99px; font-size: .8rem; font-weight: 700; }

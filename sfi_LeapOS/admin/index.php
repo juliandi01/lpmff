@@ -153,7 +153,7 @@ $availableLeapOsVersions = availableLeapOsVersions($suggestions);
     </header>
     <?php if ($error !== null): ?><p class="message error"><?= e($error) ?></p><?php endif; ?>
     <?php if ($notice !== null): ?><p class="message success"><?= e($notice) ?></p><?php endif; ?>
-    <p class="message" data-translate-notice data-translate-url="../translate.php" role="status" hidden><?= e(t('notice.translating')) ?></p>
+    <p class="message" data-translate-notice data-translate-url="../translate.php" role="status" hidden><span class="spinner" aria-hidden="true"></span><span data-translate-text><?= e(t('notice.translating')) ?></span></p>
 
     <section class="admin-panel">
       <form id="selection-form" class="admin-actions" method="post">
@@ -216,6 +216,7 @@ $availableLeapOsVersions = availableLeapOsVersions($suggestions);
         </table>
       </div>
     </section>
+  <?= renderFooter() ?>
   </main>
   <script>
     const selectionForm = document.getElementById('selection-form');

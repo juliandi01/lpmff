@@ -34,7 +34,7 @@ if (!$authenticated) {
     <body><main class="page-shell"><?= renderLanguageSelector(true) ?><section class="form-panel" style="max-width: 520px; margin: 10vh auto 0;"><p class="eyebrow"><?= e(t('admin.area')) ?></p><h1 style="font-size: 2.5rem;"><?= e(t('export.link')) ?></h1><p class="intro"><?= e(t('export.login.intro')) ?></p>
     <?php if ($error !== null): ?><p class="message error"><?= e($error) ?></p><?php endif; ?>
     <form method="post"><input type="hidden" name="action" value="login"><label for="password"><?= e(t('field.password')) ?><input id="password" name="password" type="password" autocomplete="current-password" required autofocus></label><button class="primary-button" type="submit"><?= e(t('login.submit')) ?></button></form>
-    </section></main></body></html>
+    </section><?= renderFooter() ?></main></body></html>
     <?php
     exit;
 }

@@ -88,7 +88,7 @@ $suggestions = array_reverse($allSuggestions);
 
     <?php if ($error !== null): ?><p class="message error"><?= e($error) ?></p><?php endif; ?>
     <?php if ($notice !== null): ?><p class="message success"><?= e($notice) ?></p><?php endif; ?>
-    <p class="message" data-translate-notice data-translate-url="translate.php" role="status" hidden><?= e(t('notice.translating')) ?></p>
+    <p class="message" data-translate-notice data-translate-url="translate.php" role="status" hidden><span class="spinner" aria-hidden="true"></span><span data-translate-text><?= e(t('notice.translating')) ?></span></p>
 
     <details class="form-panel form-collapsible">
       <summary class="form-toggle"><span class="eyebrow"><?= e(t('entry.new')) ?></span><span class="toggle-icon" aria-hidden="true"></span></summary>
@@ -244,6 +244,7 @@ $suggestions = array_reverse($allSuggestions);
         </div>
       </div>
     </dialog>
+  <?= renderFooter() ?>
   </main>
   <script>
     const helpDialog = document.getElementById('help-dialog');

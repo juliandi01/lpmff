@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 const SUGGESTION_FILE = __DIR__ . '/data/suggestions.json';
 const SUPPORTED_LANGUAGES = ['de', 'en'];
+const IMPRESSUM_URL = 'https://synvoll.de/kontakt/impressum/';
 const LIBRETRANSLATE_DEFAULT_URL = 'https://killerminion.ddns.berlin:443/translate';
 const MODELS = ['B03X', 'B05', 'B10', 'C10', 'T03'];
 const ALL_MODELS = 'alle';
@@ -212,6 +213,11 @@ function t(string $key): string
     }
 
     return $catalogues[$language][$key] ?? $key;
+}
+
+function renderFooter(): string
+{
+    return '<footer class="page-footer"><a href="' . e(IMPRESSUM_URL) . '" target="_blank" rel="noopener">' . e(t('impressum.link')) . '</a></footer>';
 }
 
 function renderLanguageSelector(bool $floating = false): string

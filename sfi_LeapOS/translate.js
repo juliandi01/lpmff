@@ -6,9 +6,12 @@
   }
 
   const url = notice.dataset.translateUrl;
-  const slowDelayMs = 5000;
+  const label = notice.querySelector('[data-translate-text]');
+  const baseText = label.textContent;
   let done = 0;
-  const timer = setTimeout(() => { notice.hidden = false; }, slowDelayMs);
+  const showProgress = () => { label.textContent = baseText + ' (' + done + '/' + rows.length + ')'; };
+  showProgress();
+  notice.hidden = false;
 
   const setText = (cell, text) => {
     cell.replaceChildren();
@@ -23,8 +26,9 @@
   const finish = () => {
     done += 1;
     if (done === rows.length) {
-      clearTimeout(timer);
       notice.hidden = true;
+    } else {
+      showProgress();
     }
   };
 
