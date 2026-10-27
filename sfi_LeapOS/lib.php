@@ -178,6 +178,7 @@ function suggestionTextForLanguage(array $item, string $field, ?string $language
         if ($translated !== '') {
             return $translated;
         }
+
     }
 
     $value = is_string($item[$field] ?? null) ? trim((string) $item[$field]) : '';
@@ -197,6 +198,25 @@ function suggestionTextForLanguage(array $item, string $field, ?string $language
     }
 
     return '';
+}
+
+function renderSuggestion(string $text): string
+{
+    $labels = [t('admin.rejection.label'), 'Ablehnungsbegründung:', 'Rejection reason:'];
+    foreach ($labels as $label) {
+        $marker = "\n\n" . $label . "\n";
+        $position = strrpos($text, $marker);
+        if ($position === false) {
+            continue;
+        }
+        $suggestion = substr($text, 0, $position);
+        $reason = substr($text, $position + strlen($marker));
+        return nl2br(e($suggestion))
+            . '<p class="rejection-reason"><strong>' . e($label) . '</strong><br>'
+            . nl2br(e($reason))
+            . '</p>';
+    }
+    return nl2br(e($text));
 }
 
 function libreTranslateEndpoint(): string

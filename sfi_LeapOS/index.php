@@ -181,7 +181,7 @@ $suggestions = array_reverse($allSuggestions);
               <td data-label="Status"><div class="record-symbols"><span><?= renderSymbol('status', $item['status'] ?? 'erfasst') ?></span><span><?= renderSymbol('category', $item['category'] ?? 'Nicht angegeben') ?></span><span><?= renderSymbol('classification', $item['classification'] ?? 'Nicht angegeben') ?></span></div></td>
               <td data-label="<?= e(t('table.topic')) ?>" data-field="topic"><?= e(suggestionTextForLanguage($item, 'topic')) ?></td>
               <td data-label="<?= e(t('table.model_version')) ?>"><div class="model-version-tags"><span class="model-tag"><?= e(($item['model'] ?? '') === ALL_MODELS ? t('model.all') : ($item['model'] ?? '---')) ?></span><span class="model-tag"><?= e(displayLeapOsVersion($item['leapos_version'] ?? null) === UNKNOWN_LEAPOS_VERSION ? t('version.all') : displayLeapOsVersion($item['leapos_version'] ?? null)) ?></span></div></td>
-              <td data-label="<?= e(t('table.suggestion')) ?>" data-field="suggestion" class="suggestion-cell"><?= nl2br(e(suggestionTextForLanguage($item, 'suggestion'))) ?></td>
+              <td data-label="<?= e(t('table.suggestion')) ?>" data-field="suggestion" class="suggestion-cell"><?= renderSuggestion(suggestionTextForLanguage($item, 'suggestion')) ?></td>
             </tr>
           <?php endforeach; endif; ?>
           <tr data-filter-empty hidden><td class="empty-state" colspan="6"><?= e(t('table.no_matches')) ?></td></tr>

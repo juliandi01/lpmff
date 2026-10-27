@@ -81,9 +81,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $classification = cleanText($_POST['classification'] ?? '', 40);
         $suggestion = cleanText($_POST['suggestion'] ?? '', 10000);
         $status = cleanText($_POST['status'] ?? '', 30);
-        if ($topic === '' || !isValidModel($model) || !isValidLeapOsVersion($leaposVersion) || !in_array($category, CATEGORIES, true) || !in_array($classification, CLASSIFICATIONS, true) || $suggestion === '' || !in_array($status, STATUSES, true)) {
+        $rejectionReason = cleanText($_POST['rejection_reason'] ?? '', 4000);
+        if ($status === 'abgelehnt') {
+            if ($rejectionReason === '') {
+                $error = t('admin.error.rejection_reason');
+            } elseif (mb_strlen($suggestion . "\n\n" . t('admin.rejection.label') . "\n" . $rejectionReason) > 10000) {
+                $error = t('admin.error.fields');
+            } else {
+                $suggestion .= "\n\n" . t('admin.rejection.label') . "\n" . $rejectionReason;
+            }
+        }
+        if ($error === null && ($topic === '' || !isValidModel($model) || !isValidLeapOsVersion($leaposVersion) || !in_array($category, CATEGORIES, true) || !in_array($classification, CLASSIFICATIONS, true) || $suggestion === '' || !in_array($status, STATUSES, true))) {
           $error = t('admin.error.fields');
-        } else {
+        }
+        if ($error === null) {
             foreach ($suggestions as &$item) {
                 if (($item['id'] ?? '') === $id) {
                     $sourceLanguage = currentLanguage();
@@ -108,17 +119,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } elseif ($action === 'bulk_status') {
         $status = cleanText($_POST['status'] ?? '', 30);
-      if ($ids === [] || !in_array($status, STATUSES, true)) {
+        $rejectionReason = cleanText($_POST['rejection_reason'] ?? '', 4000);
+      if ($ids === [] || !in_array($status, STATUSES, true) || ($status === 'abgelehnt' && $rejectionReason === '')) {
             $error = t('admin.error.status');
         } else {
+            $rejectionText = $status === 'abgelehnt'
+                ? "\n\n" . t('admin.rejection.label') . "\n" . $rejectionReason
+                : '';
             foreach ($suggestions as &$item) {
                 if (in_array($item['id'] ?? '', $ids, true)) {
+                    if ($rejectionText !== '' && mb_strlen((string) ($item['suggestion'] ?? '') . $rejectionText) > 10000) {
+                        $error = t('admin.error.fields');
+                        $changed = false;
+                        break;
+                    }
+                    if ($rejectionText !== '') {
+                        $item['suggestion'] = (string) ($item['suggestion'] ?? '') . $rejectionText;
+                        $item['translations'] = [];
+                    }
                     $item['status'] = $status;
                     $changed = true;
                 }
             }
             unset($item);
-            $notice = $changed ? t('admin.notice.status_changed') : t('admin.notice.none_selected');
+            if ($error === null) {
+                $notice = $changed ? t('admin.notice.status_changed') : t('admin.notice.none_selected');
+            }
         }
     }
 
@@ -143,6 +169,13 @@ $availableLeapOsVersions = availableLeapOsVersions($suggestions);
     .page-title-nowrap { white-space: nowrap; font-size: clamp(2rem, 4.4vw, 4rem); }.admin-actions { display: grid; gap: 18px; }.edit-fields { display: grid; grid-template-columns: 1fr .75fr .9fr .9fr .9fr 2fr; gap: 14px; }.edit-fields label { min-width: 0; }.edit-suggestion { min-width: 0; }.edit-fields input, .edit-fields select, .edit-fields textarea { padding: 10px 12px; }.edit-fields textarea { min-height: 44px; resize: vertical; }.action-row { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; }.action-row label { min-width: 180px; }.action-row .select-all { min-width: auto; flex-direction: row; align-items: center; gap: 8px; }.action-row .select-all input { width: 18px; height: 18px; }.action-row select { background: #fff; }.small-button { padding: 10px 14px; color: #fff; background: var(--teal); }.small-button:disabled { cursor: not-allowed; opacity: .45; }.danger-button { color: var(--red); border: 1px solid #e6b5b0; background: #fff; }.secondary-button { color: var(--ink); background: #dce4e5; }.selection-help { margin: 14px 0 0; color: var(--muted); font-size: .85rem; }.check-cell { text-align: center; }.check-cell input { min-width: auto; width: 18px; height: 18px; }.admin-table td { vertical-align: top; }
     @media (max-width: 800px) { .edit-fields { grid-template-columns: 1fr; }.edit-suggestion { grid-column: auto; } }
     @media (max-width: 700px) { .page-title-nowrap { font-size: 1.4rem; }.admin-table td { display: block; }.admin-table td::before { display: block; }.check-cell { display: block; }.action-row { align-items: stretch; flex-direction: column; }.action-row label, .action-row button { width: 100%; } }
+    .rejection-dialog { width: min(560px, calc(100% - 32px)); padding: 0; border: 1px solid #e6b5b0; border-top: 5px solid var(--red); box-shadow: 0 24px 70px rgba(29, 58, 61, .22); }
+    .rejection-dialog::backdrop { background: rgba(23, 35, 45, .42); }
+    .rejection-dialog-content { padding: 26px; }
+    .rejection-dialog h2 { color: var(--red); font-size: 1.35rem; }
+    .rejection-dialog p { color: var(--muted); line-height: 1.45; }
+    .rejection-dialog textarea { min-height: 130px; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
   </style>
 </head>
 <body>
@@ -172,7 +205,7 @@ $availableLeapOsVersions = availableLeapOsVersions($suggestions);
         <div class="action-row">
           <label class="select-all"><input id="select-all" type="checkbox"> <?= e(t('admin.select_all')) ?></label>
           <label for="bulk-status"><?= e(t('admin.field.status')) ?><select id="bulk-status" name="status"><option value=""><?= e(t('admin.status.prompt')) ?></option><?php foreach (STATUSES as $status): ?><option value="<?= e($status) ?>"><?= e(t('value.' . $status)) ?></option><?php endforeach; ?></select></label>
-          <button class="small-button" name="action" value="bulk_status" type="submit"><?= e(t('admin.status.submit')) ?></button>
+          <button class="small-button" name="action" value="bulk_status" type="submit" id="bulk-status-submit"><?= e(t('admin.status.submit')) ?></button>
           <button class="small-button" name="action" value="edit" type="submit" disabled id="save-button"><?= e(t('admin.save')) ?></button>
           <button class="small-button danger-button" name="action" value="delete" type="submit" onclick="return confirm(<?= e(json_encode(t('admin.delete.confirm'))) ?>);">
             <?= e(t('admin.delete')) ?></button>
@@ -181,6 +214,18 @@ $availableLeapOsVersions = availableLeapOsVersions($suggestions);
       </form>
       <p id="selection-help" class="selection-help"><?= e(t('admin.selection.none')) ?></p>
     </section>
+
+    <dialog class="rejection-dialog" id="rejection-dialog" aria-labelledby="rejection-dialog-title">
+      <form method="dialog" class="rejection-dialog-content">
+        <h2 id="rejection-dialog-title"><?= e(t('admin.rejection.title')) ?></h2>
+        <p><?= e(t('admin.rejection.intro')) ?></p>
+        <label for="rejection-reason"><?= e(t('admin.rejection.field')) ?><textarea id="rejection-reason" maxlength="4000" required></textarea></label>
+        <div class="dialog-actions">
+          <button class="small-button secondary-button" type="button" id="rejection-cancel"><?= e(t('admin.rejection.cancel')) ?></button>
+          <button class="small-button" value="confirm" type="submit"><?= e(t('admin.rejection.confirm')) ?></button>
+        </div>
+      </form>
+    </dialog>
 
     <section class="table-section admin-table-section">
       <div class="section-heading"><div><p class="eyebrow"><?= e(t('admin.title.count')) ?></p><h2><?= count($suggestions) ?> <?= e(t(count($suggestions) === 1 ? 'entry' : 'entries')) ?></h2></div></div>
@@ -208,7 +253,7 @@ $availableLeapOsVersions = availableLeapOsVersions($suggestions);
               <td data-label="Status"><div class="record-symbols"><span><?= renderSymbol('status', $item['status'] ?? 'erfasst') ?></span><span><?= renderSymbol('category', $item['category'] ?? 'Nicht angegeben') ?></span><span><?= renderSymbol('classification', $item['classification'] ?? 'Nicht angegeben') ?></span></div></td>
               <td data-label="<?= e(t('table.topic')) ?>" data-field="topic"><?= e(suggestionTextForLanguage($item, 'topic')) ?></td>
               <td data-label="<?= e(t('table.model_version')) ?>"><div class="model-version-tags"><span class="model-tag"><?= e(($item['model'] ?? '') === ALL_MODELS ? t('model.all') : ($item['model'] ?? '---')) ?></span><span class="model-tag"><?= e(displayLeapOsVersion($item['leapos_version'] ?? null) === UNKNOWN_LEAPOS_VERSION ? t('version.all') : displayLeapOsVersion($item['leapos_version'] ?? null)) ?></span></div></td>
-              <td data-label="<?= e(t('table.suggestion')) ?>" data-field="suggestion" class="suggestion-cell"><?= nl2br(e(suggestionTextForLanguage($item, 'suggestion'))) ?></td>
+              <td data-label="<?= e(t('table.suggestion')) ?>" data-field="suggestion" class="suggestion-cell"><?= renderSuggestion(suggestionTextForLanguage($item, 'suggestion')) ?></td>
             </tr>
           <?php endforeach; endif; ?>
           <tr data-filter-empty hidden><td class="empty-state" colspan="7"><?= e(t('table.no_matches')) ?></td></tr>
@@ -233,6 +278,15 @@ $availableLeapOsVersions = availableLeapOsVersions($suggestions);
     const saveButton = document.getElementById('save-button');
     const selectionHelp = document.getElementById('selection-help');
     const selectAll = document.getElementById('select-all');
+    const status = document.getElementById('bulk-status');
+    const rejectionDialog = document.getElementById('rejection-dialog');
+    const rejectionReason = document.getElementById('rejection-reason');
+    const bulkStatusSubmit = document.getElementById('bulk-status-submit');
+    const rejectionReasonInput = document.createElement('input');
+    rejectionReasonInput.type = 'hidden';
+    rejectionReasonInput.name = 'rejection_reason';
+    selectionForm.append(rejectionReasonInput);
+    let previousStatus = status.value;
     const selectionMessages = {
       none: <?= json_encode(t('admin.selection.none'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>,
       single: <?= json_encode(t('admin.selection.single'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>,
@@ -259,6 +313,7 @@ $availableLeapOsVersions = availableLeapOsVersions($suggestions);
       classification.value = single ? single.dataset.classification : 'Vorschlag';
       suggestion.value = single ? single.dataset.suggestion : '';
       document.getElementById('bulk-status').value = single ? single.dataset.status : '';
+      previousStatus = document.getElementById('bulk-status').value;
       topic.disabled = !single;
       model.disabled = !single;
       leaposVersion.disabled = !single;
@@ -280,6 +335,28 @@ $availableLeapOsVersions = availableLeapOsVersions($suggestions);
       if (!addingVersion) {
         leaposVersionCustom.value = '';
       }
+    });
+    status.addEventListener('change', () => {
+      if (status.value !== 'abgelehnt') {
+        previousStatus = status.value;
+        rejectionReasonInput.value = '';
+        return;
+      }
+      rejectionReason.value = '';
+      rejectionDialog.showModal();
+    });
+    document.getElementById('rejection-cancel').addEventListener('click', () => {
+      rejectionDialog.close('cancel');
+    });
+    rejectionDialog.addEventListener('close', () => {
+      if (rejectionDialog.returnValue === 'confirm' && rejectionReason.value.trim() !== '') {
+        rejectionReasonInput.value = rejectionReason.value.trim();
+        previousStatus = 'abgelehnt';
+        selectionForm.requestSubmit(bulkStatusSubmit);
+        return;
+      }
+      status.value = previousStatus === 'abgelehnt' ? '' : previousStatus;
+      rejectionReasonInput.value = '';
     });
     selectAll.addEventListener('change', () => {
       checkboxes.filter((checkbox) => !checkbox.closest('tr').hidden).forEach((checkbox) => { checkbox.checked = selectAll.checked; });
